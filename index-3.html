@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess Game</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: white; color: #161616; }
+    .main-container { max-width: 650px; margin: 38px auto; padding: 20px 24px; border-top: 1px solid #aaa; }
+    h2 { margin: 0 0 15px; font-size: 25px; }
+    .input { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+    #guess-value { width: 260px; max-width: 100%; height: 34px; border: 2px solid #666; border-radius: 4px; padding: 5px 8px; font: inherit; background: #fff; color: #111; }
+    button { border: 0; background: blue; color: white; border-radius: 5px; padding: 9px 12px; cursor: pointer; font: inherit; }
+    button:hover { background: #0000bd; }
+    button:focus-visible, input:focus-visible { outline: 2px solid #5585ff; outline-offset: 2px; }
+    hr { border: 0; border-top: 1px solid #aaa; margin: 12px 0; }
+    #result { min-height: 22px; }
+    @media (max-width: 700px) { .main-container { margin: 20px 12px; } }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <h2>Guess Game</h2>
+    <div style="margin-bottom: 10px">Guess a number between 1 - 20, you have 5 chances.</div>
+    <div class="input">
+      <input type="text" id="guess-value" name="guess-value" autocomplete="off" inputmode="numeric" />
+      <button id="guess-btn" type="button">Guess!</button>
+      <button id="restart-btn" type="button">Restart</button>
+    </div>
+    <hr />
+    <div id="attempt-text" style="margin-bottom: 10px">Attempt <span id="attempt">0</span>/5</div>
+    <div id="result" aria-live="polite"></div>
+  </div>
+  <script>
+    const input = document.getElementById('guess-value');
+    const guessButton = document.getElementById('guess-btn');
+    const restartButton = document.getElementById('restart-btn');
+    const attemptDisplay = document.getElementById('attempt');
+    const result = document.getElementById('result');
+    let target = null;
+    let attempts = 0;
+
+    function showRestart() {
+      guessButton.style.display = 'none';
+      restartButton.style.display = 'block';
+    }
+
+    function startGame() {
+      target = Math.floor(Math.random() * 20) + 1;
+      attempts = 0;
+      attemptDisplay.textContent = '0';
+      result.textContent = '';
+      input.value = '';
+      restartButton.style.display = 'none';
+      guessButton.style.display = 'block';
+      input.focus();
+    }
+
+    function guess() {
+      const raw = input.value.trim();
+      if (raw === '' || !/^\d+$/.test(raw)) return;
+      const number = Number(raw);
+      if (!Number.isInteger(number) || number < 1 || number > 20) return;
+
+      attempts += 1;
+      attemptDisplay.textContent = String(attempts);
+      if (number === target) {
+        result.textContent = 'You WIN';
+        showRestart();
+      } else if (attempts >= 5) {
+        result.textContent = 'You LOSE';
+        showRestart();
+      } else {
+        result.textContent = number + (number > target ? ' is too high' : ' is too low');
+      }
+      input.value = '0';
+      if (attempts < 5 && number !== target) input.focus();
+    }
+
+    restartButton.addEventListener('click', startGame);
+    guessButton.addEventListener('click', guess);
+    input.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && guessButton.style.display !== 'none') guess();
+    });
+    input.value = '';
+    attemptDisplay.textContent = '0';
+    result.textContent = '';
+    showRestart();
+  </script>
+</body>
+</html>
